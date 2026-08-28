@@ -1,5 +1,7 @@
 "use client";
 
+import { API_BASE_URL } from "@/config";
+
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from "react";
 import WindowDesigner from "@/components/WindowDesigner";
@@ -58,7 +60,7 @@ function HomeContent() {
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/projects/");
+      const res = await fetch(`${API_BASE_URL}/projects/`);
       const data = await res.json();
       setProjects(data);
     } catch (e) {
@@ -70,7 +72,7 @@ function HomeContent() {
     setActiveProject(id);
     setLoading(true);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/projects/${id}/result`);
+      const res = await fetch(`${API_BASE_URL}/projects/${id}/result`);
       if (res.ok) {
         const data = await res.json();
         setResult(data);
@@ -203,7 +205,7 @@ function HomeContent() {
     setResult(null);
     try {
       // 1. Önce proje oluştur
-      const projRes = await fetch("http://127.0.0.1:8000/projects/", {
+      const projRes = await fetch(`${API_BASE_URL}/projects/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: "Sipariş #" + Math.floor(Math.random() * 1000) }),
@@ -213,7 +215,7 @@ function HomeContent() {
       // 2. Siparişleri ekle
       for (const order of orders) {
         if (order.length > 0 && order.quantity > 0) {
-          await fetch(`http://127.0.0.1:8000/projects/${project.id}/orders/`, {
+          await fetch(`${API_BASE_URL}/projects/${project.id}/orders/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(order),
@@ -222,7 +224,7 @@ function HomeContent() {
       }
 
       // 3. Optimizasyonu çalıştır
-      const optRes = await fetch(`http://127.0.0.1:8000/projects/${project.id}/optimize`, {
+      const optRes = await fetch(`${API_BASE_URL}/projects/${project.id}/optimize`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ project_id: project.id, stock_length: stockLength, kerf: kerf }),
@@ -775,7 +777,7 @@ function HomeContent() {
                       if (currentAttachment) formData.append("file", currentAttachment);
                       formData.append("prompt", currentText);
                       
-                      const res = await fetch("http://127.0.0.1:8000/api/ai-analyze", {
+                      const res = await fetch(`${API_BASE_URL}/api/ai-analyze`, {
                         method: "POST",
                         body: formData,
                       });

@@ -1,5 +1,7 @@
 "use client";
 
+import { API_BASE_URL } from "@/config";
+
 import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -18,7 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const fetchProjects = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/projects/");
+      const res = await fetch(`${API_BASE_URL}/projects/`);
       const data = await res.json();
       setProjects(data);
     } catch (e) {
@@ -42,7 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (!confirm("Bu projeyi silmek istediğinize emin misiniz?")) return;
     
     try {
-      const res = await fetch(`http://127.0.0.1:8000/projects/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE_URL}/projects/${id}`, { method: "DELETE" });
       if (res.ok) {
         if (activeProjectId === id) {
           router.push("/");
