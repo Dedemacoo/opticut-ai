@@ -6,4 +6,7 @@ python-multipart
 google-genai
 python-dotenv
 pydantic
+pandas
+ortools
+openpyxl
 
