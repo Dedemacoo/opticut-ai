@@ -796,7 +796,7 @@ function HomeContent() {
                       } else {
                          setChatMessages(prev => [...prev, { role: "ai", text: "Çzgünüm, sunucuyla iletişim kurarken bir hata oluştu." }]);
                       }
-                      setTimeout(() => document.getElementById('chat-container')?.scrollTo(0, document.getElementById('chat-container')?.scrollHeight), 100);
+                      setTimeout(() => document.getElementById('chat-container')?.scrollTo(0, (document.getElementById('chat-container')?.scrollHeight || 0)), 100);
                     } catch (e) {
                       console.error(e);
                       setChatMessages(prev => [...prev, { role: "ai", text: "Bağlantı hatası oluştu. Lütfen tekrar dene." }]);
