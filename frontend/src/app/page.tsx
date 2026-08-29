@@ -283,7 +283,7 @@ function HomeContent() {
             
             <button 
               onClick={() => handleFeatureClick("AI Fotoğraf Yükleme ve OptiCut Copilot", "Pro Plus", () => setShowAiModal(true))}
-              className="relative overflow-hidden shadow-[0_0_20px_rgba(225,29,72,0.6)] hover:shadow-[0_0_25px_rgba(225,29,72,0.8)] border border-pink-500/30 px-3 md:px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap flex-shrink-0 group h-[38px]"
+              className="relative overflow-hidden shadow-[0_0_10px_rgba(225,29,72,0.4)] hover:shadow-[0_0_15px_rgba(225,29,72,0.6)] border border-pink-500/30 px-3 py-1.5 rounded-md text-[11px] font-semibold tracking-wide transition-all flex items-center justify-center gap-1.5 opacity-90 hover:opacity-100 whitespace-nowrap flex-shrink-0 group h-[32px]"
               title="Çizim fotoğrafı çekerek veya AI ile konuşarak liste oluşturun"
             >
               <video 
@@ -298,7 +298,7 @@ function HomeContent() {
               <div className="absolute inset-0 bg-gradient-to-r from-pink-900/60 to-rose-900/40 group-hover:from-pink-800/40 group-hover:to-rose-800/20 transition-all pointer-events-none z-0"></div>
               
               <span className="relative z-10 flex items-center gap-2 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                <svg className="w-5 h-5 animate-pulse text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                <svg className="w-4 h-4 animate-pulse text-pink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                 AI ile Oluştur
                 {plan !== "Pro Plus" && <svg className="w-3.5 h-3.5 ml-1 opacity-90 text-pink-300" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>}
               </span>
@@ -306,20 +306,20 @@ function HomeContent() {
 
             <button 
               onClick={() => handleFeatureClick("iWindoor 2D Çizim Modülü", "Pro", () => setShowDesigner(true))}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-900/20 border border-indigo-500/50 px-3 md:px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 h-[38px]"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-900/20 border border-indigo-500/50 px-3 py-1.5 rounded-md text-[11px] font-semibold tracking-wide transition-all flex items-center gap-1.5 opacity-90 hover:opacity-100 whitespace-nowrap flex-shrink-0 h-[32px]"
               title="Görsel olarak pencere/kapı tasarlayın"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
               iWindoor 2D
               {plan === "Standart" && <svg className="w-3.5 h-3.5 ml-1 opacity-70" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>}
             </button>
             
             <button 
               onClick={() => handleFeatureClick("Yapi & Dekorasyon", "Pro Plus", () => setShowDecoration(true))}
-              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-orange-900/20 border border-orange-500/50 px-3 md:px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 h-[38px]"
+              className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-orange-900/20 border border-orange-500/50 px-3 py-1.5 rounded-md text-[11px] font-semibold tracking-wide transition-all flex items-center gap-1.5 opacity-90 hover:opacity-100 whitespace-nowrap flex-shrink-0 h-[32px]"
               title="Yapi & Dekorasyon Modulu"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
               Yapi & Dekorasyon
               {plan !== "Pro Plus" && <svg className="w-3.5 h-3.5 ml-1 opacity-70" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>}
             </button>
@@ -408,7 +408,7 @@ function HomeContent() {
                       onClick={() => setUseScrap(!useScrap)}
                       className={`relative w-11 h-6 rounded-full transition-colors ${useScrap ? 'bg-emerald-600' : 'bg-slate-700'}`}
                     >
-                      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${useScrap ? 'translate-x-[22px]' : 'translate-x-0.5'}`}></div>
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-md transition-transform ${useScrap ? 'translate-x-[22px]' : 'translate-x-0.5'}`}></div>
                     </button>
                   </div>
                   {useScrap && (
@@ -469,7 +469,7 @@ function HomeContent() {
                     </>
                   ) : (
                     <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       <span>3. Optimizasyonu Başlat</span>
                     </>
                   )}
@@ -577,12 +577,12 @@ function HomeContent() {
             <div className="bg-[#1e293b] p-6 rounded-2xl shadow-lg border border-slate-700/50">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   Görsel Kesim Haritası
                 </h2>
                 <div className="flex items-center gap-4 text-[11px] font-semibold">
-                  <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-gradient-to-r from-emerald-500 to-green-500"></div> Net Parca</span>
-                  <span className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-sm bg-gradient-to-r from-red-900/60 to-red-800/40 border border-red-700/30"></div> Fire</span>
+                  <span className="flex items-center gap-1.5 opacity-90 hover:opacity-100"><div className="w-3 h-3 rounded-sm bg-gradient-to-r from-emerald-500 to-green-500"></div> Net Parca</span>
+                  <span className="flex items-center gap-1.5 opacity-90 hover:opacity-100"><div className="w-3 h-3 rounded-sm bg-gradient-to-r from-red-900/60 to-red-800/40 border border-red-700/30"></div> Fire</span>
                 </div>
               </div>
               
@@ -743,7 +743,7 @@ function HomeContent() {
                 }}
                 className="text-slate-400 hover:text-white bg-slate-800 p-2 rounded-xl transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             
@@ -784,7 +784,7 @@ function HomeContent() {
               
               <div className="flex items-end gap-2">
                 <label className="flex-shrink-0 cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-xl transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) {
@@ -858,7 +858,7 @@ function HomeContent() {
                   }}
                   className="flex-shrink-0 bg-pink-600 hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-colors shadow-[0_0_15px_rgba(225,29,72,0.3)]"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
                 </button>
               </div>
             </div>
