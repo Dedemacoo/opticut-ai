@@ -64,6 +64,74 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
   // Print ref
   const printRef = useRef<HTMLDivElement>(null);
 
+  // Price calculation
+  const [showPrice, setShowPrice] = useState(false);
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [priceBreakdown, setPriceBreakdown] = useState<{item: string, cost: number}[]>([]);
+
+  const calculatePrice = () => {
+    setPriceLoading(true);
+    setShowPrice(false);
+    setTimeout(() => {
+      const area = (width / 1000) * (height / 1000); // m2
+      const panelCount = verticalDivisions * horizontalDivisions;
+      
+      // Profile cost per meter (TL)
+      const profileCostPerM: Record<string, number> = {
+        "Rehau": 320, "Veka": 290, "KBE": 260, "Kommerling": 340,
+        "Salamander": 310, "Winsa": 220, "Egepen": 200, "Pilsa": 190
+      };
+      const profilePerimeter = ((width + height) * 2) / 1000;
+      const profileCost = Math.round(profilePerimeter * (profileCostPerM[profileBrand] || 250));
+
+      // Glass cost per m2
+      const glassCostPerM2: Record<string, number> = {
+        "4mm Duz Cam": 180, "4+12+4 Isicam": 350, "4+16+4 Isicam": 420,
+        "4+16+4 Low-E": 620, "6+16+6 Lamine": 750, "4+12+4+12+4 Uclu": 950
+      };
+      const glassCost = Math.round(area * (glassCostPerM2[glassType] || 400));
+
+      // Color surcharge
+      const colorSurcharge: Record<string, number> = {
+        "Beyaz": 0, "Antrasit Gri": 350, "Altinmese": 280,
+        "Ceviz": 300, "Siyah": 380, "Mahogany": 320
+      };
+      const colorCost = colorSurcharge[profileColor] || 0;
+
+      // Accessories
+      const handleCost: Record<string, number> = {
+        "Standart Kol": 85, "Kilitli Kol": 150, "Cocuk Guvenlik Kolu": 220, "Gizli Kol": 300
+      };
+      const hingeCost: Record<string, number> = {
+        "Standart Mentese": 60, "Gizli Mentese": 180, "Agir Hizmet Mentese": 250
+      };
+      const sashCount = Object.values(paneTypes).filter(t => t === 'sash' || t === 'door').length || 0;
+      const accCost = sashCount * ((handleCost[handleType] || 85) + (hingeCost[hingeType] || 60));
+
+      // Labor
+      const laborCost = Math.round(area * 400);
+
+      // Mullion cost
+      const mullionCost = ((verticalDivisions - 1) + (horizontalDivisions - 1)) * 120;
+
+      const breakdown = [
+        { item: `Profil (${profileBrand})`, cost: profileCost },
+        { item: `Cam (${glassType})`, cost: glassCost },
+        { item: `Renk Farki (${profileColor})`, cost: colorCost },
+        { item: `Aksesuar (${sashCount} kanat)`, cost: accCost },
+        { item: "Kayit Profilleri", cost: mullionCost },
+        { item: "Iscilik", cost: laborCost },
+      ].filter(b => b.cost > 0);
+
+      const total = breakdown.reduce((sum, b) => sum + b.cost, 0);
+      setPriceBreakdown(breakdown);
+      setTotalPrice(total);
+      setPriceLoading(false);
+      setShowPrice(true);
+    }, 1200);
+  };
+
   useEffect(() => {
     const t = localStorage.getItem("opticut_token");
     if(t) {
@@ -72,31 +140,34 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
   }, []);
 
   const handlePrint = () => {
-    if (!printRef.current) return;
-    const printContent = printRef.current.innerHTML;
+    const priceRows = priceBreakdown.map(b => 
+      `<tr><td style="padding:8px;border-bottom:1px solid #e2e8f0">${b.item}</td><td style="padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:bold">${b.cost.toLocaleString('tr-TR')} TL</td></tr>`
+    ).join('');
     const win = window.open('', '_blank');
     if (!win) return;
     win.document.write(`
-      <html><head><title>iWindoor - ${projectName}</title>
+      <html><head><title>${projectName}</title>
       <style>
         body { font-family: Arial, sans-serif; padding: 40px; color: #1e293b; }
-        .header { display: flex; justify-content: space-between; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
-        .header h1 { font-size: 28px; color: #0f172a; margin: 0; }
-        .header h2 { font-size: 16px; color: #64748b; margin: 8px 0 0 0; }
-        .brand { text-align: right; color: #3b82f6; font-weight: bold; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { font-size: 24px; color: #0f172a; margin: 0; }
+        .header h2 { font-size: 14px; color: #64748b; margin: 6px 0 0 0; }
+        .logo { height: 40px; }
         .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .spec-item { background: #f1f5f9; padding: 12px; border-radius: 8px; }
         .spec-label { font-size: 11px; color: #64748b; text-transform: uppercase; }
-        .spec-value { font-size: 16px; font-weight: bold; color: #0f172a; }
-        .parts-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .parts-table th { background: #1e293b; color: white; padding: 10px; text-align: left; }
-        .parts-table td { border-bottom: 1px solid #e2e8f0; padding: 10px; }
+        .spec-value { font-size: 15px; font-weight: bold; color: #0f172a; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #1e293b; color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; }
         .insulation { margin-top: 20px; padding: 15px; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; }
-        .footer { margin-top: 40px; text-align: center; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+        .total { margin-top: 20px; padding: 20px; background: #1e293b; color: white; border-radius: 12px; text-align: center; }
+        .total-amount { font-size: 32px; font-weight: 900; color: #34d399; }
+        .footer { margin-top: 40px; text-align: center; color: #94a3b8; font-size: 11px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
       </style></head><body>
       <div class="header">
-        <div><h1>iWindoor Cizim Raporu</h1><h2>${projectName}</h2></div>
-        <div class="brand"><p>OptiCut AI</p><p style="font-size:12px;color:#94a3b8">Profesyonel Uretim Yonetimi</p></div>
+        <div><h1>${projectName}</h1><h2>${new Date().toLocaleDateString('tr-TR')} tarihli cizim raporu</h2></div>
+        <img src="/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'" />
       </div>
       <div class="specs">
         <div class="spec-item"><div class="spec-label">Genislik</div><div class="spec-value">${width} mm</div></div>
@@ -104,20 +175,24 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
         <div class="spec-item"><div class="spec-label">Profil Markasi</div><div class="spec-value">${profileBrand}</div></div>
         <div class="spec-item"><div class="spec-label">Cam Tipi</div><div class="spec-value">${glassType}</div></div>
         <div class="spec-item"><div class="spec-label">Profil Rengi</div><div class="spec-value">${profileColor}</div></div>
-        <div class="spec-item"><div class="spec-label">Kol Tipi</div><div class="spec-value">${handleType}</div></div>
+        <div class="spec-item"><div class="spec-label">Kol / Mentese</div><div class="spec-value">${handleType} / ${hingeType}</div></div>
         <div class="spec-item"><div class="spec-label">Bolmeler</div><div class="spec-value">${verticalDivisions} Dikey x ${horizontalDivisions} Yatay</div></div>
         <div class="spec-item"><div class="spec-label">Profil Kalinligi</div><div class="spec-value">${frameThickness} mm</div></div>
       </div>
       <div class="insulation">
-        <strong>Yalitim Degerleri:</strong> U-Degeri: ${getUValue()} W/m²K | Ses Yalitimi: ${getSoundInsulation()} dB
+        <strong>Yalitim:</strong> U-Degeri: ${getUValue()} W/m²K | Ses: ${getSoundInsulation()} dB
       </div>
-      <table class="parts-table">
-        <tr><th>Parca</th><th>Uzunluk (mm)</th><th>Adet</th></tr>
-        <tr><td>Kasa Yatay</td><td>${width}</td><td>2</td></tr>
-        <tr><td>Kasa Dikey</td><td>${height}</td><td>2</td></tr>
-        ${verticalDivisions > 1 ? `<tr><td>Dikey Kayit</td><td>${height - frameThickness * 2}</td><td>${verticalDivisions - 1}</td></tr>` : ''}
-      </table>
-      <div class="footer">OptiCut AI &copy; ${new Date().getFullYear()} - Bu rapor otomatik olarak olusturulmustur.</div>
+      ${showPrice ? `
+        <table>
+          <tr><th>Kalem</th><th style="text-align:right">Tutar</th></tr>
+          ${priceRows}
+        </table>
+        <div class="total">
+          <p style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:2px;opacity:0.7">Toplam Maliyet</p>
+          <p class="total-amount">${totalPrice.toLocaleString('tr-TR')} TL</p>
+        </div>
+      ` : ''}
+      <div class="footer">Bu rapor otomatik olarak olusturulmustur. | ${new Date().toLocaleString('tr-TR')}</div>
       </body></html>
     `);
     win.document.close();
@@ -132,13 +207,14 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
         body: JSON.stringify({
           name: projectName,
           design_data: JSON.stringify({ width, height, verticalDivisions, horizontalDivisions, paneTypes, profileBrand, glassType, profileColor, handleType, hingeType }),
-          total_price: 1500
+          total_price: totalPrice || 0
         })
       });
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
     } catch(e) {}
   };
+
 
 
   const cyclePane = (r: number, c: number) => {
@@ -240,8 +316,8 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
   const colWidths = getColWidths();
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex justify-center items-center p-4">
-      <div className="bg-[#0f172a] rounded-2xl shadow-2xl border border-slate-700 w-full max-w-5xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex justify-center items-center p-4 animate-fadeInScale">
+      <div className="bg-[#0f172a] rounded-2xl shadow-2xl border border-slate-700 w-full max-w-5xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] animate-fadeInUp">
         
         {/* Sol Panel - Ayarlar */}
         <div className="w-full md:w-[340px] bg-[#1e293b] p-6 border-r border-slate-700/50 overflow-y-auto custom-scrollbar flex-shrink-0">
@@ -474,6 +550,33 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
                 {isSaved ? "Kaydedildi!" : "Projeyi Kaydet"}
               </button>
             </div>
+
+            {/* Fiyat Hesapla Button */}
+            <button onClick={calculatePrice} disabled={priceLoading} className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-orange-900/30 transition-all flex justify-center items-center gap-2 border border-amber-400/30">
+              {priceLoading ? (
+                <><svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Hesaplaniyor...</>
+              ) : (
+                <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Fiyat Hesapla</>
+              )}
+            </button>
+
+            {/* Price Breakdown */}
+            {showPrice && (
+              <div className="animate-fadeInUp bg-slate-800/80 rounded-xl border border-slate-700/50 overflow-hidden">
+                <div className="p-3 space-y-1.5">
+                  {priceBreakdown.map((b, i) => (
+                    <div key={i} className="flex justify-between items-center animate-fadeInUp" style={{animationDelay: `${i * 80}ms`}}>
+                      <span className="text-xs text-slate-400">{b.item}</span>
+                      <span className="text-xs font-bold text-slate-200">{b.cost.toLocaleString('tr-TR')} TL</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-center animate-fadeInScale" style={{animationDelay: '400ms'}}>
+                  <p className="text-[10px] uppercase tracking-widest text-emerald-200/70 mb-1">Toplam Maliyet</p>
+                  <p className="text-2xl font-black text-white">{totalPrice.toLocaleString('tr-TR')} TL</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
