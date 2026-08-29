@@ -28,6 +28,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       try {
         const u = JSON.parse(token);
         setUser(u);
+        setIsAuthenticated(true);
       } catch (e) {}
     }
   }, [pathname, router, isAuthPage]);

@@ -357,7 +357,7 @@ function HomeContent() {
               <h1 className="text-3xl font-black text-black">Kesim Raporu</h1>
               <h2 className="text-xl font-bold text-slate-700 mt-2">{user?.company || "OptiCut Kullanıcısı"}</h2>
               <p className="text-slate-500 font-medium">{user?.name} ({user?.email})</p>
-              <p className="text-slate-500 text-sm mt-1">Tarih: {new Date().toLocaleString("tr-TR")}</p>
+              <p suppressHydrationWarning className="text-slate-500 text-sm mt-1">Tarih: {new Date().toLocaleString("tr-TR")}</p>
             </div>
             <div className="text-right flex flex-col items-end">
               <img src="/logo.png" alt="OptiCut Logo" className="h-10 mb-2 object-contain" />
