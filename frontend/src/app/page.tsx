@@ -5,6 +5,7 @@ import { API_BASE_URL } from "@/config";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from "react";
 import WindowDesigner from "@/components/WindowDesigner";
+import DecorationDesigner from "@/components/DecorationDesigner";
 import { usePlan } from "@/context/PlanContext";
 import { Suspense } from "react";
 
@@ -63,6 +64,7 @@ function HomeContent() {
   const [projects, setProjects] = useState<any[]>([]);
   const [activeProject, setActiveProject] = useState<number | null>(null);
   const [showDesigner, setShowDesigner] = useState(false);
+  const [showDecoration, setShowDecoration] = useState(false);
   const [useScrap, setUseScrap] = useState(false);
   const [scrapLengths, setScrapLengths] = useState<string>("");
   

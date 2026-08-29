@@ -1,4 +1,4 @@
-﻿from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean
+﻿from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean, Text
 from sqlalchemy.orm import relationship
 from database import Base
 import datetime
@@ -16,6 +16,8 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     projects = relationship("Project", back_populates="owner")
+    iwindoor_projects = relationship("IWindoorProject", back_populates="owner")
+    decoration_projects = relationship("DecorationProject", back_populates="owner")
 
 class Project(Base):
     __tablename__ = "projects"
@@ -64,4 +66,33 @@ class CuttingPattern(Base):
     cuts_json = Column(String)
 
     result = relationship("OptimizationResult", back_populates="patterns")
+
+# --- YENI MODULLER ---
+
+class IWindoorProject(Base):
+    __tablename__ = "iwindoor_projects"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    name = Column(String, index=True)
+    design_data = Column(Text) # JSON string of the drawing
+    total_price = Column(Float, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    owner = relationship("User", back_populates="iwindoor_projects")
+
+class DecorationProject(Base):
+    __tablename__ = "decoration_projects"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    name = Column(String, index=True)
+    module_type = Column(String) # "Parke", "Fayans", "Alcipan", "Mutfak"
+    area_sqm = Column(Float, nullable=True)
+    linear_meters = Column(Float, nullable=True) # Süpürgelik vb. için
+    details = Column(Text, nullable=True) # JSON string for extra fields
+    estimated_price = Column(Float, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    owner = relationship("User", back_populates="decoration_projects")
 

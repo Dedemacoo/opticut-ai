@@ -1,29 +1,29 @@
-﻿from pydantic import BaseModel
+﻿from pydantic import BaseModel, EmailStr
 from typing import List, Optional
-from datetime import datetime
+import datetime
 
-# ---- AUTH ----
+# --- Auth ---
 class UserRegister(BaseModel):
     name: str
-    email: str
-    company: str = ""
+    email: EmailStr
     password: str
+    company: Optional[str] = None
+    plan: Optional[str] = "Standart"
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class UserOut(BaseModel):
     id: int
     name: str
-    email: str
-    company: str
+    email: EmailStr
+    company: Optional[str]
     plan: str
-    created_at: datetime
     class Config:
-        from_attributes = True
+        orm_mode = True
 
-# ---- ORDERS ----
+# --- Order & Project ---
 class OrderBase(BaseModel):
     length: float
     quantity: int
@@ -35,9 +35,8 @@ class Order(OrderBase):
     id: int
     project_id: int
     class Config:
-        from_attributes = True
+        orm_mode = True
 
-# ---- PROJECTS ----
 class ProjectBase(BaseModel):
     name: str
 
@@ -46,27 +45,55 @@ class ProjectCreate(ProjectBase):
 
 class Project(ProjectBase):
     id: int
-    created_at: datetime
+    created_at: datetime.datetime
     orders: List[Order] = []
     class Config:
-        from_attributes = True
+        orm_mode = True
 
-# ---- OPTIMIZATION ----
 class OptimizeRequest(BaseModel):
     project_id: int
     stock_length: float = 6000.0
     kerf: float = 3.0
 
-class CuttingPatternOut(BaseModel):
+class PatternOut(BaseModel):
     usage_count: int
     waste: float
     cuts: List[float]
 
 class OptimizationResultOut(BaseModel):
     stock_length: float
-    kerf: float
-    total_stock_used: int
+    blade_width: float
+    total_stocks_used: int
     total_waste: float
     waste_percentage: float
-    patterns: List[CuttingPatternOut]
+    patterns: List[PatternOut]
+
+# --- IWindoor ---
+class IWindoorProjectCreate(BaseModel):
+    name: str
+    design_data: str
+    total_price: Optional[float] = 0.0
+
+class IWindoorProjectOut(IWindoorProjectCreate):
+    id: int
+    user_id: Optional[int]
+    created_at: datetime.datetime
+    class Config:
+        orm_mode = True
+
+# --- Decoration ---
+class DecorationProjectCreate(BaseModel):
+    name: str
+    module_type: str
+    area_sqm: Optional[float] = 0.0
+    linear_meters: Optional[float] = 0.0
+    details: Optional[str] = "{}"
+    estimated_price: Optional[float] = 0.0
+
+class DecorationProjectOut(DecorationProjectCreate):
+    id: int
+    user_id: Optional[int]
+    created_at: datetime.datetime
+    class Config:
+        orm_mode = True
 
