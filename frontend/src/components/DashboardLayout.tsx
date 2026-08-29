@@ -15,18 +15,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const [projects, setProjects] = useState<any[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<{name: string, email: string} | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const activeProjectId = searchParams.get("projectId") ? Number(searchParams.get("projectId")) : null;
 
   // Auth check
   useEffect(() => {
-    if (!isAuthPage) {
-      const token = localStorage.getItem("opticut_token");
-      if (!token) {
-        router.push("/login");
-      } else {
-        setIsAuthenticated(true);
-      }
+    const token = localStorage.getItem("opticut_token");
+    if (!token && !isAuthPage) {
+      router.push("/login");
+    } else if (token) {
+      try {
+        const u = JSON.parse(token);
+        setUser(u);
+      } catch (e) {}
     }
   }, [pathname, router, isAuthPage]);
 
@@ -156,7 +158,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 UD
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-200">Ugur D.</p>
+                <p className="text-sm font-bold text-slate-200 truncate w-32">{user?.name || "Kullanici"}</p>
                 <p className="text-xs text-slate-500">Ayarlari Yonet</p>
               </div>
             </div>

@@ -283,7 +283,7 @@ function HomeContent() {
             
             <button 
               onClick={() => handleFeatureClick("AI Fotoğraf Yükleme ve OptiCut Copilot", "Pro Plus", () => setShowAiModal(true))}
-              className="relative overflow-hidden shadow-[0_0_20px_rgba(225,29,72,0.6)] hover:shadow-[0_0_25px_rgba(225,29,72,0.8)] border border-pink-500/30 px-5 md:px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 whitespace-nowrap flex-shrink-0 group h-[44px]"
+              className="relative overflow-hidden shadow-[0_0_20px_rgba(225,29,72,0.6)] hover:shadow-[0_0_25px_rgba(225,29,72,0.8)] border border-pink-500/30 px-3 md:px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap flex-shrink-0 group h-[38px]"
               title="Çizim fotoğrafı çekerek veya AI ile konuşarak liste oluşturun"
             >
               <video 
@@ -306,7 +306,7 @@ function HomeContent() {
 
             <button 
               onClick={() => handleFeatureClick("iWindoor 2D Çizim Modülü", "Pro", () => setShowDesigner(true))}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-900/20 border border-indigo-500/50 px-4 md:px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap flex-shrink-0"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-900/20 border border-indigo-500/50 px-3 md:px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 h-[38px]"
               title="Görsel olarak pencere/kapı tasarlayın"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
