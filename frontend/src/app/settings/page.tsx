@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { usePlan, PlanType } from "@/context/PlanContext";
@@ -37,6 +37,9 @@ export default function SettingsPage() {
   const [emailNotif, setEmailNotif] = useState(true);
   const [smsNotif, setSmsNotif] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(true);
+
+  // Modal State
+  const [activeModal, setActiveModal] = useState<{title: string, content: React.ReactNode} | null>(null);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -260,6 +263,26 @@ export default function SettingsPage() {
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${emailNotif ? "translate-x-[26px]" : "translate-x-1"}`}></div>
                     </button>
                   </div>
+                  
+                  <div className="flex items-center justify-between py-3 border-b border-slate-800">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-200">SMS Bildirimleri</p>
+                      <p className="text-xs text-slate-500 mt-0.5">Onemli uyarilari SMS olarak al (Ek ucrete tabi olabilir).</p>
+                    </div>
+                    <button onClick={() => setSmsNotif(!smsNotif)} className={`relative w-12 h-6 rounded-full transition-colors ${smsNotif ? "bg-blue-600" : "bg-slate-700"}`}>
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${smsNotif ? "translate-x-[26px]" : "translate-x-1"}`}></div>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-200">Haftalik Ozet</p>
+                      <p className="text-xs text-slate-500 mt-0.5">Uretim, maliyet ve performans analizleri haftalik olarak iletilsin.</p>
+                    </div>
+                    <button onClick={() => setWeeklyReport(!weeklyReport)} className={`relative w-12 h-6 rounded-full transition-colors ${weeklyReport ? "bg-blue-600" : "bg-slate-700"}`}>
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${weeklyReport ? "translate-x-[26px]" : "translate-x-1"}`}></div>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -275,17 +298,33 @@ export default function SettingsPage() {
                 </h3>
 
                 <div className="space-y-2">
-                  <button onClick={() => alert("info@opticut.com adresine mail atabilirsiniz.")} className="w-full text-left px-4 py-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-sm text-slate-200 transition-colors border border-slate-700">
-                    Bize Ulasin
+                  <button onClick={() => setActiveModal({
+                    title: "Bize Ulasin", 
+                    content: <div className="space-y-4"><p className="text-slate-300">Her turlu soru, gorus ve oneriniz icin destek ekibimize ulasabilirsiniz:</p><div className="bg-slate-800 p-4 rounded-lg border border-slate-700 text-center"><a href="mailto:info@opticut.com" className="text-xl font-bold text-blue-400 hover:text-blue-300 transition-colors">info@opticut.com</a></div><p className="text-sm text-slate-500">Destek ekibimiz hafta ici 09:00 - 18:00 saatleri arasinda hizmet vermektedir.</p></div>
+                  })} className="w-full text-left px-4 py-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-sm text-slate-200 transition-colors border border-slate-700 hover:border-slate-500 flex justify-between items-center group">
+                    <span>Bize Ulasin</span>
+                    <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   </button>
-                  <button onClick={() => alert("OptiCut, uretim yonetimi icin tasarlanmis yeni nesil bir bulut optimizasyon motorudur.")} className="w-full text-left px-4 py-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-sm text-slate-200 transition-colors border border-slate-700">
-                    Hakkimizda
+                  <button onClick={() => setActiveModal({
+                    title: "Hakkimizda", 
+                    content: <div className="space-y-4"><p className="text-slate-300 leading-relaxed">OptiCut AI, uretim yonetimi icin tasarlanmis yeni nesil bir bulut optimizasyon motorudur.</p><p className="text-slate-300 leading-relaxed">Temel amacimiz, PVC, ahsap ve metal ureticilerinin fire oranlarini en aza indirerek maliyet avantajı saglamak, iWindoor gibi gelismis araclarla 3D gorsellestirme ve proje hesaplamalarini tek ekranda toplayarak dijital donusume onculuk etmektir.</p><div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg"><p className="text-sm text-blue-400 font-semibold text-center">V 2.1.4 - OptiCut Uretim Motoru</p></div></div>
+                  })} className="w-full text-left px-4 py-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-sm text-slate-200 transition-colors border border-slate-700 hover:border-slate-500 flex justify-between items-center group">
+                    <span>Hakkimizda</span>
+                    <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   </button>
-                  <button onClick={() => alert("Lisans numaraniz ayarlar sekmesinde fatura kisminda belirtilmektedir.")} className="w-full text-left px-4 py-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-sm text-slate-200 transition-colors border border-slate-700">
-                    Program Lisanslari
+                  <button onClick={() => setActiveModal({
+                    title: "Program Lisanslari", 
+                    content: <div className="space-y-4"><p className="text-slate-300">OptiCut hesabiniza bagli lisans bilgileri asagidadir:</p><div className="bg-slate-800 p-4 rounded-lg border border-slate-700 space-y-2"><div className="flex justify-between"><span className="text-slate-400">Aktif Plan:</span><span className="font-bold text-white">{plan}</span></div><div className="flex justify-between"><span className="text-slate-400">Lisans Tipi:</span><span className="font-bold text-white">Ticari (Kurumsal)</span></div><div className="flex justify-between"><span className="text-slate-400">Gecerlilik:</span><span className="font-bold text-emerald-400">Sinirsiz Sureli</span></div><div className="flex justify-between"><span className="text-slate-400">Yapay Zeka Limiti:</span><span className="font-bold text-white">Sinirsiz</span></div></div></div>
+                  })} className="w-full text-left px-4 py-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-sm text-slate-200 transition-colors border border-slate-700 hover:border-slate-500 flex justify-between items-center group">
+                    <span>Program Lisanslari</span>
+                    <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   </button>
-                  <button onClick={() => alert("KVKK metni...")} className="w-full text-left px-4 py-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-sm text-slate-200 transition-colors border border-slate-700">
-                    Gizlilik Politikasi ve KVKK Aydinlatma Metni
+                  <button onClick={() => setActiveModal({
+                    title: "Gizlilik Politikasi ve KVKK", 
+                    content: <div className="space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2"><h4 className="font-bold text-white">1. Veri Sorumlusu</h4><p className="text-slate-400 text-sm leading-relaxed">OptiCut AI sistemini kullanirken, girdiginiz musteri isimleri, cizim olculeri ve fiyat bilgileriniz uctan uca sifrelenir.</p><h4 className="font-bold text-white">2. Kisisel Verilerin Islenme Amaci</h4><p className="text-slate-400 text-sm leading-relaxed">Projelerinizin bulutta yedeklenmesi ve baska cihazlardan erisilebilmesi amaciyla islenmektedir. Bu veriler hicbir 3. taraf sirket ile reklam veya pazarlama amaciyla paylasilmaz.</p><h4 className="font-bold text-white">3. Yapay Zeka Kullanim Kosullari</h4><p className="text-slate-400 text-sm leading-relaxed">Fiyat ve uretim tahminlemesi icin gonderilen veriler tamamen anonimlestirilerek LLM motorlarinda islenir.</p></div>
+                  })} className="w-full text-left px-4 py-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-sm text-slate-200 transition-colors border border-slate-700 hover:border-slate-500 flex justify-between items-center group">
+                    <span>Gizlilik Politikasi ve KVKK Aydinlatma Metni</span>
+                    <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   </button>
                 </div>
               </div>
@@ -294,6 +333,28 @@ export default function SettingsPage() {
 
         </div>
       </div>
+
+      {/* Modern Modal Overlay */}
+      {activeModal && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex justify-center items-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#1e293b] w-full max-w-lg rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-5 border-b border-slate-800 bg-slate-900/50">
+              <h3 className="text-lg font-bold text-white">{activeModal.title}</h3>
+              <button onClick={() => setActiveModal(null)} className="text-slate-500 hover:text-white transition-colors p-1 bg-slate-800 hover:bg-slate-700 rounded-lg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6">
+              {activeModal.content}
+            </div>
+            <div className="p-5 border-t border-slate-800 flex justify-end bg-slate-900/50">
+              <button onClick={() => setActiveModal(null)} className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/30">
+                Anladim, Kapat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

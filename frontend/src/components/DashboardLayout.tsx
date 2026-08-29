@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { API_BASE_URL } from "@/config";
 
@@ -156,7 +156,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/settings" onClick={() => setIsMobileMenuOpen(false)} className={`flex items-center justify-between p-2 rounded-lg transition-all ${pathname === "/settings" ? "bg-slate-800" : "hover:bg-slate-800/80"}`}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg">
-                UD
+                {user?.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : "U"}
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-200 truncate w-32">{user?.name || "Kullanici"}</p>
