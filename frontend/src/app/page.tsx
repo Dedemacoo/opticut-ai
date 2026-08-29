@@ -13,6 +13,22 @@ function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { plan } = usePlan();
+  
+  // User Data State
+  const [user, setUser] = useState<{name: string, email: string, company: string, plan: string} | null>(null);
+
+  useEffect(() => {
+    const storedUserStr = localStorage.getItem("opticut_token");
+    if (storedUserStr) {
+      try {
+        const storedUser = JSON.parse(storedUserStr);
+        if (typeof storedUser === "object") {
+          setUser(storedUser);
+        }
+      } catch (e) {}
+    }
+  }, []);
+
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -144,6 +160,111 @@ function HomeContent() {
         alert(`${eklendi} parça Excel'den başarıyla aktarıldı!`);
       } else {
         alert("Excel dosyasında geçerli bir parça bulunamadı. Lütfen 'Boy' ve 'Adet' sütun başlıklarını kontrol edin.");
+  const [stockLength, setStockLength] = useState<number>(6000);
+  const [kerf, setKerf] = useState<number>(3);
+  
+  const [orders, setOrders] = useState([{ length: 1400, quantity: 66 }, { length: 2000, quantity: 24 }]);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [activeProject, setActiveProject] = useState<number | null>(null);
+  const [showDesigner, setShowDesigner] = useState(false);
+  const [useScrap, setUseScrap] = useState(false);
+  const [scrapLengths, setScrapLengths] = useState<string>("");
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sayfa yüklendiğinde geçmiş projeleri çek
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/projects/`);
+      const data = await res.json();
+      setProjects(data);
+    } catch (e) {
+      console.error("Projeler yüklenemedi", e);
+    }
+  };
+
+  const loadProjectResult = async (id: number) => {
+    setActiveProject(id);
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/projects/${id}/result`);
+      if (res.ok) {
+        const data = await res.json();
+        setResult(data);
+      } else {
+        setResult(null);
+        alert("Bu projenin henüz optimizasyon sonucu yok.");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setLoading(false);
+  };
+
+  const startNewProject = () => {
+    setActiveProject(null);
+    setResult(null);
+    setOrders([{ length: 1400, quantity: 66 }]);
+  };
+
+  const handleAddOrder = () => {
+    setOrders([...orders, { length: 0, quantity: 0 }]);
+  };
+
+  const handleUpdateOrder = (index: number, field: string, value: number) => {
+    const newOrders = [...orders];
+    newOrders[index] = { ...newOrders[index], [field]: value };
+    setOrders(newOrders);
+  };
+
+  const handleRemoveOrder = (index: number) => {
+    const newOrders = orders.filter((_, i) => i !== index);
+    setOrders(newOrders);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const { read, utils } = await import("xlsx");
+      const data = await file.arrayBuffer();
+      const workbook = read(data);
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData: any[] = utils.sheet_to_json(firstSheet);
+      
+      const newOrders = [...orders]; // Mevcut listeyi koru
+      let eklendi = 0;
+      
+      jsonData.forEach((row) => {
+        // Excel'de "Boy" ve "Adet" sütunları olmalı (büyük/küçük harf toleranslı)
+        const lengthKey = Object.keys(row).find(k => k.toLowerCase().includes('boy') || k.toLowerCase().includes('uzunluk') || k.toLowerCase().includes('length'));
+        const qtyKey = Object.keys(row).find(k => k.toLowerCase().includes('adet') || k.toLowerCase().includes('miktar') || k.toLowerCase().includes('qty') || k.toLowerCase().includes('quantity'));
+        
+        if (lengthKey && qtyKey) {
+          const l = Number(row[lengthKey]);
+          const q = Number(row[qtyKey]);
+          if (l > 0 && q > 0) {
+            newOrders.push({ length: l, quantity: q });
+            eklendi++;
+          }
+        }
+      });
+      
+      // Eğer listede en baştaki boş (0, 0) satırı duruyorsa onu temizle
+      const filteredOrders = newOrders.filter(o => o.length > 0 && o.quantity > 0);
+      setOrders(filteredOrders.length > 0 ? filteredOrders : newOrders);
+      
+      if (eklendi > 0) {
+        alert(`${eklendi} parça Excel'den başarıyla aktarıldı!`);
+      } else {
+        alert("Excel dosyasında geçerli bir parça bulunamadı. Lütfen 'Boy' ve 'Adet' sütun başlıklarını kontrol edin.");
       }
     } catch (error) {
       console.error("Excel okuma hatası:", error);
@@ -159,12 +280,16 @@ function HomeContent() {
     const { utils, writeFile } = await import("xlsx");
     const wb = utils.book_new();
     
+    const companyInfo = user?.company ? user.company : "OptiCut Kullanıcısı";
+    const userInfo = user?.name ? user.name + " (" + user.email + ")" : "";
+
     const summaryData = [
-      ["OptiCut Kesim Raporu"],
-      ["Proje Adı", "Proje #" + activeProject],
-      ["Tarih", new Date().toLocaleString()],
+      ["OPTICUT KESİM RAPORU", "", "", "YAZILIM BİLGİLERİ"],
+      ["Firma:", companyInfo, "", "Program:", "OptiCut AI"],
+      ["Hazırlayan:", userInfo, "", "Web:", "www.opticut.com"],
+      ["Tarih:", new Date().toLocaleString(), "", "", ""],
       [""],
-      ["Özet Bilgiler", ""],
+      ["-- ÖZET BİLGİLER --", ""],
       ["Stok Boyu (mm)", result.stock_length || stockLength],
       ["Bıçak Payı / Kerf (mm)", result.blade_width || kerf],
       ["Kullanılan Profil Sayısı", result.total_stocks_used],
@@ -172,26 +297,29 @@ function HomeContent() {
       ["Toplam Fire (mm)", result.total_waste],
       ["Toplam Fire (metre)", (result.total_waste / 1000).toFixed(2)]
     ];
+    
     const wsSummary = utils.aoa_to_sheet(summaryData);
+    wsSummary["!cols"] = [{wch: 25}, {wch: 35}, {wch: 5}, {wch: 15}, {wch: 25}];
     utils.book_append_sheet(wb, wsSummary, "Özet");
 
     const patternsData = [
-      ["Desen No", "Adet", "Verimlilik (%)", "Fire (mm)", "Kesilecek Parçalar (mm)"]
+      ["Profil No", "Adet", "Verimlilik (%)", "Fire (mm)", "Kesilecek Parçalar (mm)"]
     ];
     
     result.patterns.forEach((pattern: any, idx: number) => {
       const efficiency = ((1 - pattern.waste / (result.stock_length || Number(stockLength))) * 100).toFixed(1);
       patternsData.push([
-        (idx + 1).toString(),
-        pattern.usage_count.toString(),
-        `${efficiency}%`,
-        pattern.waste.toFixed(0),
+        "Profil " + (idx + 1),
+        pattern.usage_count,
+        efficiency,
+        pattern.waste,
         pattern.cuts.join(", ")
       ]);
     });
     
     const wsPatterns = utils.aoa_to_sheet(patternsData);
-    utils.book_append_sheet(wb, wsPatterns, "Kesim Haritası");
+    wsPatterns["!cols"] = [{wch: 15}, {wch: 10}, {wch: 15}, {wch: 15}, {wch: 60}];
+    utils.book_append_sheet(wb, wsPatterns, "Kesim Listesi");
 
     writeFile(wb, `OptiCut_Rapor_${new Date().getTime()}.xlsx`);
   };
@@ -326,7 +454,23 @@ function HomeContent() {
           </div>
         </div>
 
-        {!activeProject && (
+        
+          {/* SADECE PDF/YAZDIRMA EKRANINDA GORUNECEK OLAN KURUMSAL HEADER */}
+          <div className="hidden print:flex justify-between items-end mb-8 pb-4 border-b-2 border-slate-800">
+            <div>
+              <h1 className="text-3xl font-black text-black">Kesim Raporu</h1>
+              <h2 className="text-xl font-bold text-slate-700 mt-2">{user?.company || "OptiCut Kullanıcısı"}</h2>
+              <p className="text-slate-500 font-medium">{user?.name} ({user?.email})</p>
+              <p className="text-slate-500 text-sm mt-1">Tarih: {new Date().toLocaleString("tr-TR")}</p>
+            </div>
+            <div className="text-right flex flex-col items-end">
+              <img src="/logo.png" alt="OptiCut Logo" className="h-10 mb-2 object-contain" />
+              <p className="text-sm font-bold text-blue-600">OptiCut AI - Üretim Yönetimi</p>
+              <p className="text-xs text-slate-500">www.opticut.com</p>
+            </div>
+          </div>
+  
+          {!activeProject && (
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-8 animate-in fade-in slide-in-from-top-4">
             
             {/* Sol Panel - Veri Girişi */}
