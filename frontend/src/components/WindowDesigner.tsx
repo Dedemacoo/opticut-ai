@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense, lazy } from "react";
+import dynamic from "next/dynamic";
+
+const Window3DViewer = dynamic(() => import("./Window3DViewer"), { 
+  ssr: false,
+  loading: () => <div className="w-full h-full min-h-[400px] flex items-center justify-center bg-slate-900/50 rounded-xl"><div className="text-slate-500 text-sm animate-pulse">3D Yukleniyor...</div></div>
+});
 
 type PaneType = 'fixed' | 'sash' | 'door';
 
@@ -63,6 +69,9 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
 
   // Print ref
   const printRef = useRef<HTMLDivElement>(null);
+
+  // 3D View toggle
+  const [view3D, setView3D] = useState(false);
 
   // Price calculation
   const [showPrice, setShowPrice] = useState(false);
@@ -584,14 +593,41 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
         <div ref={printRef} className="flex-1 p-8 flex flex-col justify-center items-center bg-[#0c1524] relative overflow-hidden">
           
           {/* Blueprint Grid */}
-          <div className="absolute inset-0 opacity-10" style={{
+          <div className="absolute inset-0 opacity-10 print:hidden" style={{
             backgroundImage: 'linear-gradient(rgba(59,130,246,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.3) 1px, transparent 1px)',
             backgroundSize: '20px 20px'
           }}></div>
 
-          <div className="relative z-10 flex flex-col items-center">
+          {/* 3D Toggle Button */}
+          <div className="absolute top-4 right-4 z-20 print:hidden bg-slate-900/80 backdrop-blur p-1 rounded-lg border border-slate-700/50 flex shadow-lg">
+            <button onClick={() => setView3D(false)} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${!view3D ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>2D Cizim</button>
+            <button onClick={() => setView3D(true)} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${view3D ? 'bg-amber-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
+              3D Gorunum
+            </button>
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center w-full h-full justify-center">
             
-            {/* Genislik */}
+            {view3D ? (
+              <div className="w-full h-full flex-1 flex flex-col min-h-[400px]">
+                <Suspense fallback={<div className="w-full h-full flex items-center justify-center"><div className="text-amber-500 animate-pulse font-bold text-lg">3D Motoru Baslatiliyor...</div></div>}>
+                  <Window3DViewer 
+                    width={width}
+                    height={height}
+                    verticalDivisions={verticalDivisions}
+                    horizontalDivisions={horizontalDivisions}
+                    frameThickness={frameThickness}
+                    paneTypes={paneTypes}
+                    hDividerPos={hDividerPos}
+                    vDividerPos={vDividerPos}
+                    profileColor={profileColor}
+                  />
+                </Suspense>
+              </div>
+            ) : (
+              <>
+                {/* Genislik */}
             <div className="flex items-center gap-2 mb-3" style={{ width: `${drawW}px` }}>
               <div className="h-px bg-blue-500/50 flex-1"></div>
               <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded whitespace-nowrap">{width} mm</span>
@@ -746,6 +782,8 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
                 Kapi
               </span>
             </div>
+            </>
+            )}
           </div>
         </div>
         
