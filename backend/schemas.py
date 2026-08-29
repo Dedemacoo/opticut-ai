@@ -1,7 +1,29 @@
-from pydantic import BaseModel
+﻿from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
+# ---- AUTH ----
+class UserRegister(BaseModel):
+    name: str
+    email: str
+    company: str = ""
+    password: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+    email: str
+    company: str
+    plan: str
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+# ---- ORDERS ----
 class OrderBase(BaseModel):
     length: float
     quantity: int
@@ -15,6 +37,7 @@ class Order(OrderBase):
     class Config:
         from_attributes = True
 
+# ---- PROJECTS ----
 class ProjectBase(BaseModel):
     name: str
 
@@ -28,6 +51,7 @@ class Project(ProjectBase):
     class Config:
         from_attributes = True
 
+# ---- OPTIMIZATION ----
 class OptimizeRequest(BaseModel):
     project_id: int
     stock_length: float = 6000.0
@@ -45,3 +69,4 @@ class OptimizationResultOut(BaseModel):
     total_waste: float
     waste_percentage: float
     patterns: List[CuttingPatternOut]
+

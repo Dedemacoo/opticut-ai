@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import { API_BASE_URL } from "@/config";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,38 +11,62 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Geçici login simülasyonu
-    setTimeout(() => {
-      setIsLoading(false);
-      localStorage.setItem("opticut_token", "valid");
+    setError("");
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || "Giris basarisiz.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Kullanici bilgilerini kaydet
+      localStorage.setItem("opticut_token", JSON.stringify(data.user));
+      localStorage.setItem("opticut_plan", data.user.plan);
       router.push("/");
-    }, 1000);
+    } catch (err) {
+      setError("Sunucuya baglanilamiyor. Lutfen tekrar deneyin.");
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 flex flex-col justify-center items-center p-4 relative overflow-hidden">
-      {/* Abstract Background Shapes */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="OptiCut Logo" className="h-16 mx-auto mb-4 drop-shadow-lg" />
-          <h1 className="text-2xl font-bold text-white tracking-tight">Hesabınıza Giriş Yapın</h1>
-          <p className="text-slate-400 text-sm mt-2">OptiCut Yönetim Paneline Hoş Geldiniz</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Hesabiniza Giris Yapin</h1>
+          <p className="text-slate-400 text-sm mt-2">OptiCut Yonetim Paneline Hos Geldiniz</p>
         </div>
 
         <form onSubmit={handleLogin} className="bg-slate-900/40 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-slate-700/50">
           <div className="space-y-6">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-xl text-center font-medium">
+                {error}
+              </div>
+            )}
+
             <div>
               <label className="block text-[11px] font-bold text-slate-400 mb-2 uppercase tracking-widest">E-posta Adresi</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -49,19 +74,19 @@ export default function LoginPage() {
                 placeholder="ornek@sirket.com"
               />
             </div>
-            
+
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Şifre</label>
+              <label className="block text-[11px] font-bold text-slate-400 mb-2 uppercase tracking-widest">Sifre</label>
               <div className="relative">
-                <input 
-                  type={showPassword ? "text" : "password"} 
+                <input
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full p-3.5 bg-slate-950/50 border border-slate-700/50 rounded-xl text-slate-200 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all pr-12"
-                  placeholder="••••••••"
+                  placeholder="Sifrenizi girin"
                 />
-                <button 
+                <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-3.5 text-slate-400 hover:text-slate-200 transition-colors"
@@ -73,29 +98,27 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-              <div className="flex justify-end mt-2">
-                <Link href="#" className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors">Şifremi Unuttum?</Link>
-              </div>
             </div>
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               disabled={isLoading}
               className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all flex justify-center items-center mt-2 disabled:opacity-70"
             >
               {isLoading ? (
                 <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
               ) : (
-                "Giriş Yap"
+                "Giris Yap"
               )}
             </button>
           </div>
         </form>
 
         <p className="text-center text-sm text-slate-400 mt-8 font-medium">
-          Henüz hesabınız yok mu? <Link href="/register" className="text-blue-400 hover:text-blue-300 font-bold ml-1">Kayıt Olun</Link>
+          Henuz hesabiniz yok mu? <Link href="/register" className="text-blue-400 hover:text-blue-300 font-bold ml-1">Kayit Olun</Link>
         </p>
       </div>
     </div>
   );
 }
+

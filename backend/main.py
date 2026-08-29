@@ -20,6 +20,7 @@ import models
 import schemas
 from database import engine, get_db
 from optimizer_service import run_optimization
+from auth import hash_password, verify_password
 
 # Veritabanı tablolarını oluştur
 models.Base.metadata.create_all(bind=engine)
@@ -28,7 +29,7 @@ app = FastAPI(title="1D Kesim Optimizasyon API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Frontend URL'sine (localhost:3000) izin veriyoruz
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,6 +39,35 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"message": "Kesim Optimizasyon API Çalışıyor!"}
+
+# ========== AUTH ENDPOINTS ==========
+
+@app.post("/api/register")
+def register_user(user: schemas.UserRegister, db: Session = Depends(get_db)):
+    existing = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Bu e-posta adresi zaten kayitli.")
+    
+    db_user = models.User(
+        name=user.name,
+        email=user.email,
+        company=user.company,
+        hashed_password=hash_password(user.password),
+        plan="Standart"
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return {"message": "Kayit basarili", "user": {"id": db_user.id, "name": db_user.name, "email": db_user.email, "company": db_user.company, "plan": db_user.plan}}
+
+@app.post("/api/login")
+def login_user(creds: schemas.UserLogin, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == creds.email).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="E-posta veya sifre hatali.")
+    if not verify_password(creds.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="E-posta veya sifre hatali.")
+    return {"message": "Giris basarili", "user": {"id": user.id, "name": user.name, "email": user.email, "company": user.company, "plan": user.plan}}
 
 @app.post("/projects/", response_model=schemas.Project)
 def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)):
