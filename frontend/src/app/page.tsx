@@ -855,7 +855,7 @@ function HomeContent() {
 
       {/* Özel CSS */}
       <style dangerouslySetInnerHTML={{__html: `
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { display: none; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         .pattern-diagonal-lines-sm { background-image: repeating-linear-gradient(45deg, #1e293b 0, #1e293b 2px, #0f172a 0, #0f172a 50%); background-size: 8px 8px; }

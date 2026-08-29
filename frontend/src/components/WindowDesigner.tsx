@@ -56,7 +56,7 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
         body: JSON.stringify({
           name: projectName,
           design_data: JSON.stringify({ width, height, verticalDivisions, horizontalDivisions }),
-          total_price: 1500 # mock price
+          total_price: 1500 // mock price
         })
       });
       setIsSaved(true);
@@ -147,7 +147,7 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
               </button>
             </div>
             
-            <div className="relative border-4 border-white print:border-black bg-slate-800/50 print:bg-transparent shadow-2xl transition-all" style={{ width: \`\${Math.min(width / 3, 300)}px\`, height: \`\${Math.min(height / 3, 400)}px\` }}>
+            <div className="relative border-4 border-white print:border-black bg-slate-800/50 print:bg-transparent shadow-2xl transition-all" style={{ width: `${Math.min(width / 3, 300)}px`, height: `${Math.min(height / 3, 400)}px` }}>
               {/* Cizim detaylari (yatay/dikey cizgiler mock) */}
               <div className="absolute inset-0 flex items-center justify-center opacity-30 text-white print:text-black">
                 Pencere Tasarimi ({width}x{height})
