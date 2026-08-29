@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type PaneType = 'fixed' | 'sash' | 'door';
 
@@ -27,6 +27,43 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
   const [isSaved, setIsSaved] = useState(false);
   const [user, setUser] = useState<{company: string, name: string, email: string} | null>(null);
 
+  // NEW: Profile Brand
+  const [profileBrand, setProfileBrand] = useState("Rehau");
+  const profileBrands = ["Rehau", "Veka", "KBE", "Kommerling", "Salamander", "Winsa", "Egepen", "Pilsa"];
+
+  // NEW: Glass Type
+  const [glassType, setGlassType] = useState("4+16+4 Isicam");
+  const glassTypes = ["4mm Duz Cam", "4+12+4 Isicam", "4+16+4 Isicam", "4+16+4 Low-E", "6+16+6 Lamine", "4+12+4+12+4 Uclu"];
+
+  // NEW: Accessory
+  const [handleType, setHandleType] = useState("Standart Kol");
+  const handleTypes = ["Standart Kol", "Kilitli Kol", "Cocuk Guvenlik Kolu", "Gizli Kol"];
+  const [hingeType, setHingeType] = useState("Standart Mentese");
+  const hingeTypes = ["Standart Mentese", "Gizli Mentese", "Agir Hizmet Mentese"];
+
+  // NEW: Color
+  const [profileColor, setProfileColor] = useState("Beyaz");
+  const profileColors = ["Beyaz", "Antrasit Gri", "Altinmese", "Ceviz", "Siyah", "Mahogany"];
+
+  // NEW: Insulation Calc
+  const getUValue = (): number => {
+    const glassU: Record<string, number> = {
+      "4mm Duz Cam": 5.8, "4+12+4 Isicam": 2.8, "4+16+4 Isicam": 2.6,
+      "4+16+4 Low-E": 1.1, "6+16+6 Lamine": 2.4, "4+12+4+12+4 Uclu": 0.7
+    };
+    return glassU[glassType] || 2.6;
+  };
+  const getSoundInsulation = (): number => {
+    const soundDb: Record<string, number> = {
+      "4mm Duz Cam": 25, "4+12+4 Isicam": 30, "4+16+4 Isicam": 32,
+      "4+16+4 Low-E": 33, "6+16+6 Lamine": 38, "4+12+4+12+4 Uclu": 42
+    };
+    return soundDb[glassType] || 30;
+  };
+
+  // Print ref
+  const printRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const t = localStorage.getItem("opticut_token");
     if(t) {
@@ -34,7 +71,58 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
     }
   }, []);
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    if (!printRef.current) return;
+    const printContent = printRef.current.innerHTML;
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`
+      <html><head><title>iWindoor - ${projectName}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 40px; color: #1e293b; }
+        .header { display: flex; justify-content: space-between; border-bottom: 3px solid #3b82f6; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; color: #0f172a; margin: 0; }
+        .header h2 { font-size: 16px; color: #64748b; margin: 8px 0 0 0; }
+        .brand { text-align: right; color: #3b82f6; font-weight: bold; }
+        .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .spec-item { background: #f1f5f9; padding: 12px; border-radius: 8px; }
+        .spec-label { font-size: 11px; color: #64748b; text-transform: uppercase; }
+        .spec-value { font-size: 16px; font-weight: bold; color: #0f172a; }
+        .parts-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .parts-table th { background: #1e293b; color: white; padding: 10px; text-align: left; }
+        .parts-table td { border-bottom: 1px solid #e2e8f0; padding: 10px; }
+        .insulation { margin-top: 20px; padding: 15px; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; }
+        .footer { margin-top: 40px; text-align: center; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+      </style></head><body>
+      <div class="header">
+        <div><h1>iWindoor Cizim Raporu</h1><h2>${projectName}</h2></div>
+        <div class="brand"><p>OptiCut AI</p><p style="font-size:12px;color:#94a3b8">Profesyonel Uretim Yonetimi</p></div>
+      </div>
+      <div class="specs">
+        <div class="spec-item"><div class="spec-label">Genislik</div><div class="spec-value">${width} mm</div></div>
+        <div class="spec-item"><div class="spec-label">Yukseklik</div><div class="spec-value">${height} mm</div></div>
+        <div class="spec-item"><div class="spec-label">Profil Markasi</div><div class="spec-value">${profileBrand}</div></div>
+        <div class="spec-item"><div class="spec-label">Cam Tipi</div><div class="spec-value">${glassType}</div></div>
+        <div class="spec-item"><div class="spec-label">Profil Rengi</div><div class="spec-value">${profileColor}</div></div>
+        <div class="spec-item"><div class="spec-label">Kol Tipi</div><div class="spec-value">${handleType}</div></div>
+        <div class="spec-item"><div class="spec-label">Bolmeler</div><div class="spec-value">${verticalDivisions} Dikey x ${horizontalDivisions} Yatay</div></div>
+        <div class="spec-item"><div class="spec-label">Profil Kalinligi</div><div class="spec-value">${frameThickness} mm</div></div>
+      </div>
+      <div class="insulation">
+        <strong>Yalitim Degerleri:</strong> U-Degeri: ${getUValue()} W/m²K | Ses Yalitimi: ${getSoundInsulation()} dB
+      </div>
+      <table class="parts-table">
+        <tr><th>Parca</th><th>Uzunluk (mm)</th><th>Adet</th></tr>
+        <tr><td>Kasa Yatay</td><td>${width}</td><td>2</td></tr>
+        <tr><td>Kasa Dikey</td><td>${height}</td><td>2</td></tr>
+        ${verticalDivisions > 1 ? `<tr><td>Dikey Kayit</td><td>${height - frameThickness * 2}</td><td>${verticalDivisions - 1}</td></tr>` : ''}
+      </table>
+      <div class="footer">OptiCut AI &copy; ${new Date().getFullYear()} - Bu rapor otomatik olarak olusturulmustur.</div>
+      </body></html>
+    `);
+    win.document.close();
+    win.print();
+  };
   
   const handleSave = async () => {
     try {
@@ -43,7 +131,7 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: projectName,
-          design_data: JSON.stringify({ width, height, verticalDivisions, horizontalDivisions, paneTypes }),
+          design_data: JSON.stringify({ width, height, verticalDivisions, horizontalDivisions, paneTypes, profileBrand, glassType, profileColor, handleType, hingeType }),
           total_price: 1500
         })
       });
@@ -287,18 +375,110 @@ export default function WindowDesigner({ onClose, onExport }: WindowDesignerProp
               </div>
             </div>
 
+            {/* Adim 4 - Profil & Cam */}
+            <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+              <h3 className="text-sm font-bold text-cyan-400 mb-3 flex items-center gap-2">
+                <span className="bg-cyan-500/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black">4</span>
+                Profil & Cam
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-400 mb-1">Profil Markasi</label>
+                  <select value={profileBrand} onChange={e => setProfileBrand(e.target.value)} className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm outline-none focus:ring-1 focus:ring-cyan-500">
+                    {profileBrands.map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-400 mb-1">Cam Tipi</label>
+                  <select value={glassType} onChange={e => setGlassType(e.target.value)} className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm outline-none focus:ring-1 focus:ring-cyan-500">
+                    {glassTypes.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-400 mb-1">Profil Rengi</label>
+                  <select value={profileColor} onChange={e => setProfileColor(e.target.value)} className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm outline-none focus:ring-1 focus:ring-cyan-500">
+                    {profileColors.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Adim 5 - Aksesuar */}
+            <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+              <h3 className="text-sm font-bold text-rose-400 mb-3 flex items-center gap-2">
+                <span className="bg-rose-500/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black">5</span>
+                Aksesuar
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-400 mb-1">Kol Tipi</label>
+                  <select value={handleType} onChange={e => setHandleType(e.target.value)} className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm outline-none focus:ring-1 focus:ring-rose-500">
+                    {handleTypes.map(h => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-400 mb-1">Mentese Tipi</label>
+                  <select value={hingeType} onChange={e => setHingeType(e.target.value)} className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm outline-none focus:ring-1 focus:ring-rose-500">
+                    {hingeTypes.map(h => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Adim 6 - Yalitim Bilgisi */}
+            <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+              <h3 className="text-sm font-bold text-teal-400 mb-3 flex items-center gap-2">
+                <span className="bg-teal-500/20 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black">6</span>
+                Yalitim Degerleri
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-700/30 text-center">
+                  <p className="text-[10px] text-slate-500 uppercase">Isi (U-Degeri)</p>
+                  <p className="text-lg font-black text-teal-400">{getUValue()}</p>
+                  <p className="text-[10px] text-slate-500">W/m²K</p>
+                </div>
+                <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-700/30 text-center">
+                  <p className="text-[10px] text-slate-500 uppercase">Ses Yalitimi</p>
+                  <p className="text-lg font-black text-teal-400">{getSoundInsulation()}</p>
+                  <p className="text-[10px] text-slate-500">dB</p>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                {getUValue() <= 1.3 ? "Mukemmel yalitim! Enerji tasarrufunda ust seviye." :
+                 getUValue() <= 2.0 ? "Iyi yalitim. Standart konutlar icin uygun." :
+                 "Temel yalitim. Daha iyi cam secimi onerilir."}
+              </p>
+            </div>
+
+            {/* Proje Adi */}
+            <div className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+              <label className="block text-[11px] font-medium text-slate-400 mb-1">Proje Adi</label>
+              <input type="text" value={projectName} onChange={e => setProjectName(e.target.value)} className="w-full p-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 text-sm outline-none focus:ring-1 focus:ring-indigo-500" />
+            </div>
+
           </div>
           
-          <div className="mt-6">
-            <button onClick={calculateParts} className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-900/30 transition-all flex justify-center items-center gap-2 border border-emerald-500/30">
+          {/* Action Buttons */}
+          <div className="mt-6 space-y-2">
+            <button onClick={calculateParts} className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-900/30 transition-all flex justify-center items-center gap-2 border border-emerald-500/30">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              Ihtiyac Listesine Aktar
+              Kesim Listesine Aktar
             </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={handlePrint} className="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2.5 px-4 rounded-xl transition-all flex justify-center items-center gap-2 border border-slate-600/50 text-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                PDF Indir
+              </button>
+              <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-4 rounded-xl transition-all flex justify-center items-center gap-2 shadow-lg shadow-blue-900/30 text-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                {isSaved ? "Kaydedildi!" : "Projeyi Kaydet"}
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Sag Panel - Cizim */}
-        <div className="flex-1 p-8 flex flex-col justify-center items-center bg-[#0c1524] relative overflow-hidden">
+        <div ref={printRef} className="flex-1 p-8 flex flex-col justify-center items-center bg-[#0c1524] relative overflow-hidden">
           
           {/* Blueprint Grid */}
           <div className="absolute inset-0 opacity-10" style={{
