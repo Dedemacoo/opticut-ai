@@ -18,6 +18,7 @@ export default function LoginPage() {
     // Geçici login simülasyonu
     setTimeout(() => {
       setIsLoading(false);
+      localStorage.setItem("opticut_token", "valid");
       router.push("/");
     }, 1000);
   };

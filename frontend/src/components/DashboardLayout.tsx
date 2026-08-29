@@ -9,6 +9,22 @@ import Link from "next/link";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+
+  useEffect(() => {
+    if (!isAuthPage) {
+      const token = localStorage.getItem("opticut_token");
+      if (!token) {
+        router.push("/login");
+      }
+    }
+  }, [pathname, router, isAuthPage]);
+
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
+
   const searchParams = useSearchParams();
   
   const [projects, setProjects] = useState<any[]>([]);
