@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { API_BASE_URL } from "@/config";
 
@@ -9,30 +9,26 @@ import Link from "next/link";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const isAuthPage = pathname === "/login" || pathname === "/register";
 
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const activeProjectId = searchParams.get("projectId") ? Number(searchParams.get("projectId")) : null;
+
+  // Auth check
   useEffect(() => {
     if (!isAuthPage) {
       const token = localStorage.getItem("opticut_token");
       if (!token) {
         router.push("/login");
+      } else {
+        setIsAuthenticated(true);
       }
     }
   }, [pathname, router, isAuthPage]);
-
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
-
-  const searchParams = useSearchParams();
-  
-  const [projects, setProjects] = useState<any[]>([]);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const activeProjectId = searchParams.get("projectId") ? Number(searchParams.get("projectId")) : null;
-
-  // Sadece yetkilendirme dışı sayfalarda Layout'u göster
-  const isAuthPage = pathname === "/login" || pathname === "/register";
 
   const fetchProjects = async () => {
     try {
@@ -40,25 +36,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const data = await res.json();
       setProjects(data);
     } catch (e) {
-      console.error("Projeler yüklenemedi", e);
+      console.error("Projeler yuklenemedi", e);
     }
   };
 
   useEffect(() => {
-    if (!isAuthPage) {
+    if (!isAuthPage && isAuthenticated) {
       fetchProjects();
-      
-      // page.tsx tarafından yeni proje eklendiğinde listeyi güncellemek için listener
       const handleProjectAdded = () => fetchProjects();
       window.addEventListener("refresh-projects", handleProjectAdded);
       return () => window.removeEventListener("refresh-projects", handleProjectAdded);
     }
-  }, [isAuthPage]);
+  }, [isAuthPage, isAuthenticated]);
+
+  // Auth pages: no sidebar, no layout
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
+
+  // Not authenticated yet, show loading
+  if (!isAuthenticated) {
+    return <div className="h-screen bg-[#0f172a] text-white flex items-center justify-center">Yukleniyor...</div>;
+  }
 
   const handleDeleteProject = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("Bu projeyi silmek istediğinize emin misiniz?")) return;
-    
+    if (!confirm("Bu projeyi silmek istediginize emin misiniz?")) return;
     try {
       const res = await fetch(`${API_BASE_URL}/projects/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -68,13 +71,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         fetchProjects();
       }
     } catch (e) {
-      console.error("Silme hatası:", e);
+      console.error("Silme hatasi:", e);
     }
   };
 
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
+  const handleLogout = () => {
+    localStorage.removeItem("opticut_token");
+    localStorage.removeItem("opticut_plan");
+    router.push("/login");
+  };
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-200 flex font-sans selection:bg-blue-500/30 overflow-hidden">
@@ -91,7 +96,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className={`print:hidden fixed inset-y-0 left-0 z-50 w-72 bg-[#1e293b] border-r border-slate-700/50 flex flex-col transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-6 border-b border-slate-800 flex flex-col items-center relative">
           <img src="/logo.png" alt="OptiCut Logo" className="w-48 h-auto object-contain drop-shadow-xl mb-4" />
-          <p className="text-slate-500 text-xs font-medium uppercase tracking-wider text-center">Kurumsal Üretim Yönetimi</p>
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wider text-center">Kurumsal Uretim Yonetimi</p>
           <button 
             className="absolute top-4 right-4 md:hidden text-slate-400 hover:text-white"
             onClick={() => setIsMobileMenuOpen(false)}
@@ -114,9 +119,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
-          <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-2">Geçmiş Projeler</h3>
+          <h3 className="text-xs font-bold text-slate-500 uppercase mb-3 ml-2">Gecmis Projeler</h3>
           {projects.length === 0 ? (
-            <p className="text-sm text-slate-600 italic ml-2">Henüz proje yok...</p>
+            <p className="text-sm text-slate-600 italic ml-2">Henuz proje yok...</p>
           ) : (
             projects.map(p => (
               <div 
@@ -125,10 +130,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   router.push(`/?projectId=${p.id}`);
                   setIsMobileMenuOpen(false);
                 }}
-                className={`w-full text-left px-4 py-3 rounded-xl transition-all flex items-center justify-between group cursor-pointer ${pathname === "/" && activeProjectId === p.id ? 'bg-blue-900/40 border border-blue-700/50 text-blue-300' : 'hover:bg-slate-800 border border-transparent text-slate-400 hover:text-slate-200'}`}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all flex items-center justify-between group cursor-pointer ${pathname === "/" && activeProjectId === p.id ? "bg-blue-900/40 border border-blue-700/50 text-blue-300" : "hover:bg-slate-800 border border-transparent text-slate-400 hover:text-slate-200"}`}
               >
                 <div className="flex items-center gap-3 truncate">
-                  <svg className={`w-4 h-4 flex-shrink-0 ${pathname === "/" && activeProjectId === p.id ? 'text-blue-400' : 'text-slate-600 group-hover:text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <svg className={`w-4 h-4 flex-shrink-0 ${pathname === "/" && activeProjectId === p.id ? "text-blue-400" : "text-slate-600 group-hover:text-slate-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   <span className="truncate text-sm font-medium">{p.name}</span>
                 </div>
                 <button 
@@ -151,22 +156,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 UD
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-200">Uğur D.</p>
-                <p className="text-xs text-slate-500">Ayarları Yönet</p>
+                <p className="text-sm font-bold text-slate-200">Ugur D.</p>
+                <p className="text-xs text-slate-500">Ayarlari Yonet</p>
               </div>
             </div>
             <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           </Link>
-          <button onClick={() => router.push("/login")} className="w-full mt-3 text-xs text-slate-500 hover:text-slate-300 flex items-center justify-center gap-1 py-2">
+          <button onClick={handleLogout} className="w-full mt-3 text-xs text-slate-500 hover:text-slate-300 flex items-center justify-center gap-1 py-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            Çıkış Yap
+            Cikis Yap
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 h-screen overflow-y-auto custom-scrollbar flex flex-col">
-        {/* Mobil Header (Hamburger Menü İçin) */}
+        {/* Mobil Header */}
         <div className="print:hidden md:hidden flex items-center justify-between p-4 border-b border-slate-800 bg-[#1e293b]">
           <div className="flex items-center gap-3">
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 -ml-2 text-slate-400 hover:text-white">
@@ -179,7 +184,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
         
-        {/* İçerik */}
+        {/* Icerik */}
         <div className="p-4 md:p-8 flex-1">
           {children}
         </div>
@@ -187,3 +192,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+
